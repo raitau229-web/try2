@@ -8,6 +8,7 @@ export interface Trip {
   plannedNights: number | null; // 「何泊何日」の目安。構造上の制約ではなく参考表示用
   startDateTime: string | null; // 出発日時(ISO)。設定すると最初のStopの暗黙のピン留めとして使われる
   currency: string; // default "JPY"
+  sharedId: ID | null; // Supabaseのshared_tripsに公開した行のid。未公開ならnull
   createdAt: string;
   updatedAt: string;
 }
@@ -98,3 +99,29 @@ export interface Settings {
   googleMapsApiKey: string | null;
   geminiApiKey: string | null; // 乗換案内のスクリーンショットからの経路読み取りに使用
 }
+
+// 旅行を検索タブに公開する際、stops/legsのスナップショットをそのままjsonbで保存する。
+// 公開後にユーザーが自分の行程表を編集しても、閲覧者に見えるスナップショットは変わらない
+// (再公開すると更新される)。
+export interface SharedTripSnapshot {
+  area: string;
+  plannedNights: number | null;
+  startDateTime: string | null;
+  currency: string;
+  stops: Stop[];
+  legs: Leg[];
+}
+
+export interface SharedTrip {
+  id: ID;
+  user_id: string;
+  title: string;
+  description: string | null;
+  snapshot: SharedTripSnapshot;
+  created_at: string;
+  profiles: { display_name: string } | null;
+  likes: { user_id: string }[];
+}
+
+export const SHARED_TRIP_SELECT =
+  "*, profiles!shared_trips_user_id_fkey(display_name), likes:shared_trip_likes(user_id)";

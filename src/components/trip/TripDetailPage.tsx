@@ -3,8 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { useTrip } from "../../hooks/useTrip";
 import { ItineraryTimeline } from "../itinerary/ItineraryTimeline";
 import { BudgetPage } from "../budget/BudgetPage";
+import { SharePanel } from "./SharePanel";
 
-type Tab = "itinerary" | "budget";
+type Tab = "itinerary" | "budget" | "share";
 
 export function TripDetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -37,12 +38,13 @@ export function TripDetailPage() {
         <button className={tab === "budget" ? "active" : ""} onClick={() => setTab("budget")}>
           予算
         </button>
+        <button className={tab === "share" ? "active" : ""} onClick={() => setTab("share")}>
+          共有
+        </button>
       </div>
-      {tab === "itinerary" ? (
-        <ItineraryTimeline tripId={trip.id} />
-      ) : (
-        <BudgetPage tripId={trip.id} />
-      )}
+      {tab === "itinerary" && <ItineraryTimeline tripId={trip.id} />}
+      {tab === "budget" && <BudgetPage tripId={trip.id} />}
+      {tab === "share" && <SharePanel tripId={trip.id} />}
     </div>
   );
 }
