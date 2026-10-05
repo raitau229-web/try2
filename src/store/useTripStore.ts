@@ -152,6 +152,7 @@ interface Actions {
   addTrip: (title: string, area: string) => ID;
   updateTrip: (id: ID, patch: Partial<Trip>) => void;
   deleteTrip: (id: ID) => void;
+  setTripSharedId: (id: ID, sharedId: ID | null) => void;
 
   addStop: (
     tripId: ID,
@@ -207,6 +208,7 @@ export const useTripStore = create<Store>()(
               plannedNights: null,
               startDateTime: null,
               currency: "JPY",
+              sharedId: null,
               createdAt: now(),
               updatedAt: now(),
             };
@@ -232,6 +234,12 @@ export const useTripStore = create<Store>()(
               if (s.budgetEntries[entryId].tripId === id)
                 delete s.budgetEntries[entryId];
             }
+          }),
+        setTripSharedId: (id, sharedId) =>
+          set((s) => {
+            const trip = s.trips[id];
+            if (!trip) return;
+            trip.sharedId = sharedId;
           }),
 
         addStop: (tripId, input, insertAfterStopId) => {
@@ -483,7 +491,7 @@ export const useTripStore = create<Store>()(
     })),
     {
       name: "trip-planner-storage",
-      version: 2,
+      version: 3,
       migrate: (persistedState, version) => {
         const state = persistedState as TripPlannerState | undefined;
 
@@ -503,6 +511,13 @@ export const useTripStore = create<Store>()(
           if (!state.budgetEntries) state.budgetEntries = {};
           for (const leg of Object.values(state.legs)) {
             syncLegBudgetEntry(state, leg);
+          }
+        }
+
+        // v2→v3: 検索タブへの旅程共有機能を追加。既存のTripにはsharedId(未公開)を補う。
+        if (version < 3 && state?.trips) {
+          for (const trip of Object.values(state.trips)) {
+            trip.sharedId = trip.sharedId ?? null;
           }
         }
 

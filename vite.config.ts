@@ -3,7 +3,8 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Vercelはドメイン直下で配信するため '/'、GitHub Pagesはリポジトリ名配下のため '/try2/'
-  base: process.env.VERCEL ? '/' : '/try2/',
+  // Vercelやドメイン直下で配信する場合は '/'。GitHub Pagesでリポジトリ名配下に
+  // デプロイする場合は BASE_PATH (例: '/trip-share/') をビルド時に指定する。
+  base: process.env.BASE_PATH ?? '/',
   plugins: [react()],
 })
